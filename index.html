@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate QR Codes</title>
+    <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .container {
+            margin-top: 50px;
+        }
+        #qrCodes {
+            margin-top: 20px;
+        }
+        .qr-code-container {
+            margin-bottom: 20px;
+        }
+        textarea {
+            resize: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mb-4">Generate QR Codes for Links</h1>
+        <form id="qrForm">
+            <div class="form-group">
+                <label for="links">Enter links (one per line):</label>
+                <textarea class="form-control" id="links" name="links" rows="5" cols="50"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Generate QR Codes</button>
+        </form>
+
+        <div id="qrCodes"></div>
+    </div>
+
+    <script>
+        document.getElementById('qrForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            var links = document.getElementById('links').value.split('\n');
+            var qrCodesContainer = document.getElementById('qrCodes');
+            qrCodesContainer.innerHTML = ''; // Clear previous QR codes
+            
+            links.forEach(function(link) {
+                var qrCodeContainer = document.createElement('div');
+                qrCodeContainer.classList.add('qr-code-container');
+
+                var linkText = link.trim();
+                var linkDiv = document.createElement('p');
+                linkDiv.textContent = linkText;
+                qrCodeContainer.appendChild(linkDiv);
+                
+                var qrCodeDiv = document.createElement('div');
+                var qrCode = new QRCode(qrCodeDiv, {
+                    text: linkText,
+                    width: 200,
+                    height: 200,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                qrCodeContainer.appendChild(qrCodeDiv);
+
+                var downloadBtn = document.createElement('button');
+                downloadBtn.textContent = 'Download QR Code';
+                downloadBtn.classList.add('btn', 'btn-primary', 'mt-2');
+                downloadBtn.onclick = function() {
+                    var canvas = qrCodeDiv.querySelector('canvas');
+                    var url = canvas.toDataURL('image/png');
+                    var link = document.createElement('a');
+                    link.href = url;
+                    link.download = linkText + '.png';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                };
+                qrCodeContainer.appendChild(downloadBtn);
+
+                qrCodesContainer.appendChild(qrCodeContainer);
+            });
+        });
+    </script>
+</body>
+</html>
